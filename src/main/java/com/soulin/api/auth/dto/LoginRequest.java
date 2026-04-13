@@ -7,12 +7,11 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class SignupRequest {
+public class LoginRequest {
     @Email
     @NotBlank
     private String email;
+
     @NotBlank
     private String password;
-    @NotBlank
-    private String userName;
 }

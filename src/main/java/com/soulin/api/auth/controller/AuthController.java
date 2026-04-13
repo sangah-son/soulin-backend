@@ -1,5 +1,7 @@
 package com.soulin.api.auth.controller;
 
+import com.soulin.api.auth.dto.LoginRequest;
+import com.soulin.api.auth.dto.LoginResponse;
 import com.soulin.api.auth.dto.SignupRequest;
 import com.soulin.api.auth.dto.SignupResponse;
 import com.soulin.api.auth.service.AuthService;
@@ -23,5 +25,11 @@ public class AuthController {
     public ResponseEntity<SignupResponse> signup(@Valid @RequestBody SignupRequest request){
         SignupResponse response=authService.signup(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request){
+        LoginResponse response=authService.login(request);
+        return ResponseEntity.ok(response);
     }
 }
