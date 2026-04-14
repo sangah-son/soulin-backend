@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ProfileResponse {
-    private String userName;
     private String email;
+    private String userName;
 }

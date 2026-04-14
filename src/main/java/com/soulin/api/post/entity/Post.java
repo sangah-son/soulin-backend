@@ -48,4 +48,12 @@ public class Post extends BaseEntity{
         this.user=user;
         this.color=color;
     }
+
+    public void updatePost(String title, String content, Boolean isPublic, Color color) {
+        this.title = title;
+        this.content = content;
+        this.isPublic = isPublic;
+        this.color = color;
+    }
+
 }

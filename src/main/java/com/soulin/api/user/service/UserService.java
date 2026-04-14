@@ -21,8 +21,8 @@ public class UserService {
                 .orElseThrow(()->new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         return new ProfileResponse(
-                user.getUserName(),
-                user.getEmail()
+                user.getEmail(),
+                user.getUserName()
         );
     }
 
@@ -31,8 +31,8 @@ public class UserService {
                 .orElseThrow(()->new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         user.updateProfile(request.getEmail(), request.getUserName());
         return new UpdateProfileResponse(
-                user.getUserName(),
-                user.getEmail()
+                user.getEmail(),
+                user.getUserName()
         );
     }
 
