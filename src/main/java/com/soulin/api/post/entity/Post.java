@@ -56,4 +56,11 @@ public class Post extends BaseEntity{
         this.color = color;
     }
 
+    public void publish(){
+        this.status=PostStatus.PUBLISHED;
+    }
+
+    public void reject(){
+        this.status=PostStatus.REJECTED;
+    }
 }

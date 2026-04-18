@@ -1,9 +1,6 @@
 package com.soulin.api.post.controller;
 
-import com.soulin.api.post.dto.CreatePostRequest;
-import com.soulin.api.post.dto.MyPostSummaryResponse;
-import com.soulin.api.post.dto.PostDetailResponse;
-import com.soulin.api.post.dto.UpdatePostRequest;
+import com.soulin.api.post.dto.*;
 import com.soulin.api.post.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -47,5 +44,13 @@ public class PostController {
     public ResponseEntity<Void> deletePost(@PathVariable Long postId){
         postService.deletePost(postId);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/posts/publish")
+    public ResponseEntity<PublishPostResponse> publishPost(
+            @Valid @RequestBody PublishPostRequest request
+    ){
+        PublishPostResponse response=postService.publishPost(request);
+        return ResponseEntity.ok(response);
     }
 }

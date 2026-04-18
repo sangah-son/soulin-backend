@@ -2,11 +2,13 @@ package com.soulin.api.post.service;
 
 import com.soulin.api.color.entity.Color;
 import com.soulin.api.color.repository.ColorRepository;
+import com.soulin.api.moderation.ModerationStatus;
+import com.soulin.api.moderation.dto.ModerationResult;
+import com.soulin.api.moderation.entity.Moderation;
+import com.soulin.api.moderation.repository.ModerationRepository;
+import com.soulin.api.moderation.service.ModerationService;
 import com.soulin.api.post.PostStatus;
-import com.soulin.api.post.dto.CreatePostRequest;
-import com.soulin.api.post.dto.MyPostSummaryResponse;
-import com.soulin.api.post.dto.PostDetailResponse;
-import com.soulin.api.post.dto.UpdatePostRequest;
+import com.soulin.api.post.dto.*;
 import com.soulin.api.post.entity.Post;
 import com.soulin.api.post.repository.PostRepository;
 import com.soulin.api.user.entity.User;
@@ -24,6 +26,8 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final ColorRepository colorRepository;
+    private final ModerationRepository moderationRepository;
+    private final ModerationService moderationService;
 
     public PostDetailResponse createDraftPost(Long userId, CreatePostRequest request){
         User user=userRepository.findById(userId)
@@ -119,5 +123,41 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
         postRepository.delete(post);
+    }
+
+    public PublishPostResponse publishPost(PublishPostRequest request){
+        Post post=postRepository.findById(request.getPostId())
+                .orElseThrow(()->new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        ModerationResult moderationResult=moderationService.moderate(
+                post.getTitle(),
+                post.getContent()
+        );
+
+        Moderation moderation=new Moderation(
+                moderationResult.getStatus(),
+                moderationResult.getReason(),
+                post
+        );
+
+        moderationRepository.save(moderation);
+
+        if(moderationResult.getStatus()== ModerationStatus.APPROVED){
+            post.publish();
+            return new PublishPostResponse(
+                    post.getPostId(),
+                    PostStatus.PUBLISHED,
+                    "피드에 게시되었습니다.",
+                    null
+            );
+        }
+
+        post.reject();
+        return new PublishPostResponse(
+                post.getPostId(),
+                PostStatus.REJECTED,
+                "게시가 반려되었습니다.",
+                moderationResult.getReason()
+        );
     }
 }
