@@ -62,7 +62,7 @@ jobs:
           host: ${{ secrets.DEV_SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: ${{ secrets.SSH_PORT }}
+          port: 2222
           script: |
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/soulin-backend:${{ needs.build-and-push.outputs.tag }}
             cd ~/soulin/backend
