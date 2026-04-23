@@ -2,8 +2,10 @@ package com.soulin.api.auth.service;
 
 import com.soulin.api.auth.dto.LoginRequest;
 import com.soulin.api.auth.dto.LoginResponse;
+import com.soulin.api.auth.dto.LogoutResponse;
 import com.soulin.api.auth.dto.SignupRequest;
 import com.soulin.api.auth.dto.SignupResponse;
+import com.soulin.api.global.jwt.JwtTokenProvider;
 import com.soulin.api.user.entity.User;
 import com.soulin.api.user.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public SignupResponse signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -42,9 +45,21 @@ public class AuthService {
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
             throw new IllegalArgumentException("이메일 혹은 비밀번호가 올바르지 않습니다.");
         }
+
+        String accessToken= jwtTokenProvider.createAccessToken(user.getId(), user.getEmail());
+
         return new LoginResponse(
+                accessToken,
                 user.getId(),
                 user.getUserName()
         );
+    }
+
+    @Transactional(readOnly = true)
+    public LogoutResponse logout(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        return new LogoutResponse("로그아웃되었습니다.");
     }
 }

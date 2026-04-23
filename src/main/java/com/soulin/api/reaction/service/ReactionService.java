@@ -2,6 +2,7 @@ package com.soulin.api.reaction.service;
 
 import com.soulin.api.color.entity.Color;
 import com.soulin.api.color.repository.ColorRepository;
+import com.soulin.api.post.PostStatus;
 import com.soulin.api.post.entity.Post;
 import com.soulin.api.post.repository.PostRepository;
 import com.soulin.api.reaction.dto.CreatePostReactionRequest;
@@ -32,7 +33,7 @@ public class ReactionService {
     @Transactional(readOnly = true)
     public List<ReactionTypeResponse> getReactionTypes(){
         return reactionTypeRepository.findAll().stream()
-                .map(reactionType->new ReactionTypeResponse(
+                .map(reactionType -> new ReactionTypeResponse(
                         reactionType.getReactionTypeId(),
                         reactionType.getReactionName(),
                         reactionType.getReactionText()
@@ -47,8 +48,11 @@ public class ReactionService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
-        if (postReactionRepository.existsByPostAndUser(post, user))
+        validatePublicPublishedPost(post);
+
+        if (postReactionRepository.existsByPostAndUser(post, user)) {
             throw new IllegalArgumentException("이미 공감을 남겼습니다.");
+        }
 
         Color color = colorRepository.findById(request.getColorId())
                 .orElseThrow(() -> new IllegalArgumentException("색상을 찾을 수 없습니다."));
@@ -75,6 +79,8 @@ public class ReactionService {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        validatePublicPublishedPost(post);
 
         PostReaction postReaction = postReactionRepository.findByPostAndUser(post, user)
                 .orElseThrow(() -> new IllegalArgumentException("공감 정보가 존재하지 않습니다."));
@@ -104,10 +110,17 @@ public class ReactionService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
-        PostReaction postReaction=postReactionRepository.findByPostAndUser(post,user)
-                .orElseThrow(()->new IllegalArgumentException("공감 정보가 존재하지 않습니다."));
+        validatePublicPublishedPost(post);
+
+        PostReaction postReaction = postReactionRepository.findByPostAndUser(post, user)
+                .orElseThrow(() -> new IllegalArgumentException("공감 정보가 존재하지 않습니다."));
 
         postReactionRepository.delete(postReaction);
     }
-}
 
+    private void validatePublicPublishedPost(Post post) {
+        if (post.getStatus() != PostStatus.PUBLISHED || !post.getIsPublic()) {
+            throw new IllegalArgumentException("공개된 게시글에만 공감을 남길 수 있습니다.");
+        }
+    }
+}

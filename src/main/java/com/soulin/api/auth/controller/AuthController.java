@@ -2,14 +2,16 @@ package com.soulin.api.auth.controller;
 
 import com.soulin.api.auth.dto.LoginRequest;
 import com.soulin.api.auth.dto.LoginResponse;
+import com.soulin.api.auth.dto.LogoutResponse;
 import com.soulin.api.auth.dto.SignupRequest;
 import com.soulin.api.auth.dto.SignupResponse;
 import com.soulin.api.auth.service.AuthService;
-import com.soulin.api.user.repository.UserRepository;
+import com.soulin.api.global.jwt.CustomUserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +32,14 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request){
         LoginResponse response=authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<LogoutResponse> logout(
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ){
+        LogoutResponse response = authService.logout(principal.getUserId());
         return ResponseEntity.ok(response);
     }
 }

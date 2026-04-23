@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface ModerationRepository extends JpaRepository<Moderation,Long> {
     List<Moderation> findAllByPost(Post post);
+    void deleteAllByPost(Post post);
 }

@@ -12,4 +12,5 @@ public interface BookmarkRepository extends JpaRepository<Bookmark,Long> {
     boolean existsByUserAndPost(User user, Post post);
     Optional<Bookmark> findByUserAndPost(User user, Post post);
     List<Bookmark> findAllByUserOrderByCreatedAtDesc(User user);
+    void deleteAllByPost(Post post);
 }

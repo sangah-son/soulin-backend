@@ -1,12 +1,12 @@
-package com.soulin.api.auth.dto;
+package com.soulin.api.global.jwt;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class LoginResponse {
-    private String accessToken;
+public class CustomUserPrincipal {
     private Long userId;
+    private String email;
     private String userName;
 }

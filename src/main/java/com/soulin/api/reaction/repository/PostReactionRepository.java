@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface PostReactionRepository extends JpaRepository<PostReaction,Long> {
     boolean existsByPostAndUser(Post post, User user);
     Optional<PostReaction> findByPostAndUser(Post post, User user);
+    void deleteAllByPost(Post post);
 }

@@ -21,6 +21,7 @@ public class Color {
     private String colorCode;
 
     public Color(Integer colorId, String colorName, String colorCode){
+        this.colorId=colorId;
         this.colorName=colorName;
         this.colorCode=colorCode;
     }
