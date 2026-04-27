@@ -18,5 +18,6 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     @Query("select p from Post p where p.user = :user and (p.status = :status or p.isPublic = :isPublic) order by p.createdAt desc")
     List<Post> findMyDraftOrPrivatePosts(@Param("user") User user, @Param("status") PostStatus status, @Param("isPublic") Boolean isPublic);
     List<Post> findAllByStatusAndIsPublicOrderByCreatedAtDesc(PostStatus status, Boolean isPublic);
+    List<Post> findAllByUserAndStatusAndIsPublic(User user, PostStatus status, Boolean isPublic);
     List<Post> findAllByStatusAndIsPublicAndColor_ColorIdOrderByCreatedAtDesc(PostStatus status, Boolean isPublic, Integer colorId);
 }

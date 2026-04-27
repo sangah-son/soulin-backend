@@ -2,6 +2,8 @@ package com.soulin.api.reaction.controller;
 
 import com.soulin.api.global.jwt.CustomUserPrincipal;
 import com.soulin.api.reaction.dto.CreatePostReactionRequest;
+import com.soulin.api.reaction.dto.MyReactionSummaryResponse;
+import com.soulin.api.reaction.dto.PostReactionDetailResponse;
 import com.soulin.api.reaction.dto.PostReactionResponse;
 import com.soulin.api.reaction.dto.ReactionTypeResponse;
 import com.soulin.api.reaction.service.ReactionService;
@@ -52,5 +54,21 @@ public class PostReactionController {
     ){
         reactionService.deletePostReaction(principal.getUserId(), postId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/users/me/reactions/summary")
+    public ResponseEntity<MyReactionSummaryResponse> getMyReactionSummary(
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ){
+        MyReactionSummaryResponse response=reactionService.getMyReactionSummary(principal.getUserId());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/posts/{postId}/reactions/details")
+    public ResponseEntity<PostReactionDetailResponse> getPostReactionDetails(
+            @PathVariable Long postId
+    ){
+        PostReactionDetailResponse response = reactionService.getPostReactionDetails(postId);
+        return ResponseEntity.ok(response);
     }
 }

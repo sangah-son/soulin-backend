@@ -5,10 +5,14 @@ import com.soulin.api.reaction.entity.PostReaction;
 import com.soulin.api.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface PostReactionRepository extends JpaRepository<PostReaction,Long> {
     boolean existsByPostAndUser(Post post, User user);
     Optional<PostReaction> findByPostAndUser(Post post, User user);
+    List<PostReaction> findAllByPost(Post post);
     void deleteAllByPost(Post post);
+    List<PostReaction> findAllByPostIn(List<Post> posts);
+    List<PostReaction> findAllByPostInOrderByCreatedAtDesc(List<Post> posts);
 }
