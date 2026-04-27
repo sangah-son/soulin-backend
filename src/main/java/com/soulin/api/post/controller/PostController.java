@@ -34,9 +34,10 @@ public class PostController {
 
     @GetMapping("/users/me/posts")
     public ResponseEntity<List<MyPostSummaryResponse>> getMyPosts(
-            @AuthenticationPrincipal CustomUserPrincipal principal
+            @AuthenticationPrincipal CustomUserPrincipal principal,
+            @RequestParam(required = false) String tab
     ){
-        List<MyPostSummaryResponse> response = postService.getMyPosts(principal.getUserId());
+        List<MyPostSummaryResponse> response = postService.getMyPosts(principal.getUserId(), tab);
         return ResponseEntity.ok(response);
     }
 

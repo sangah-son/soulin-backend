@@ -15,6 +15,7 @@ public class PostDetailResponse {
     private String content;
     private Boolean isPublic;
     private Integer colorId;
+    private Long userId;
     private String userName;
     private PostStatus status;
     private LocalDateTime createdAt;

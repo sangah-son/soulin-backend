@@ -62,6 +62,7 @@ public class PostService {
                 savedPost.getContent(),
                 savedPost.getIsPublic(),
                 savedPost.getColor().getColorId(),
+                savedPost.getUser().getId(),
                 savedPost.getUser().getUserName(),
                 savedPost.getStatus(),
                 savedPost.getCreatedAt(),
@@ -70,10 +71,10 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<MyPostSummaryResponse> getMyPosts(Long userId){
+    public List<MyPostSummaryResponse> getMyPosts(Long userId, String tab){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        List<Post> posts = postRepository.findAllByUser(user);
+        List<Post> posts = findMyPostsByTab(user, tab);
 
         return posts.stream()
                 .map(post -> new MyPostSummaryResponse(
@@ -88,6 +89,19 @@ public class PostService {
                         post.getUpdatedAt()
                 ))
                 .toList();
+    }
+
+    private List<Post> findMyPostsByTab(User user, String tab) {
+        if (tab == null || tab.isBlank()) {
+            return postRepository.findAllByUserOrderByCreatedAtDesc(user);
+        }
+
+        return switch (tab) {
+            case "published" -> postRepository.findAllByUserAndStatusOrderByCreatedAtDesc(user, PostStatus.PUBLISHED);
+            case "draft-private" -> postRepository.findMyDraftOrPrivatePosts(user, PostStatus.DRAFT, false);
+            case "rejected" -> postRepository.findAllByUserAndStatusOrderByCreatedAtDesc(user, PostStatus.REJECTED);
+            default -> throw new IllegalArgumentException("허용되지 않은 tab 값입니다.");
+        };
     }
 
     @Transactional(readOnly = true)
@@ -105,6 +119,7 @@ public class PostService {
                 post.getContent(),
                 post.getIsPublic(),
                 post.getColor().getColorId(),
+                post.getUser().getId(),
                 post.getUser().getUserName(),
                 post.getStatus(),
                 post.getCreatedAt(),
@@ -124,6 +139,7 @@ public class PostService {
                 post.getContent(),
                 post.getIsPublic(),
                 post.getColor().getColorId(),
+                post.getUser().getId(),
                 post.getUser().getUserName(),
                 post.getStatus(),
                 post.getCreatedAt(),
@@ -152,6 +168,7 @@ public class PostService {
                 post.getContent(),
                 post.getIsPublic(),
                 post.getColor().getColorId(),
+                post.getUser().getId(),
                 post.getUser().getUserName(),
                 post.getStatus(),
                 post.getCreatedAt(),
@@ -182,6 +199,7 @@ public class PostService {
                         post.getTitle(),
                         post.getContent(),
                         post.getColor().getColorId(),
+                        post.getUser().getId(),
                         post.getUser().getUserName(),
                         post.getCreatedAt()
                 ))

@@ -12,6 +12,7 @@ public class PostSummaryResponse {
     private String title;
     private String content;
     private Integer colorId;
+    private Long userId;
     private String userName;
     private LocalDateTime createdAt;
 }
