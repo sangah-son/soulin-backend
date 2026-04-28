@@ -24,22 +24,20 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void seedColors() {
-        if (colorRepository.count() > 0) {
-            return;
-        }
-
+        // PK(colorId)가 지정된 상태로 saveAll → 신규 row는 INSERT, 기존 row는 UPDATE(merge)
+        // 따라서 hex가 바뀌어도 서버 재시작만으로 자동 동기화됨.
         colorRepository.saveAll(List.of(
-                new Color(1, "RED", "#FF3B30"),
-                new Color(2, "ORANGE", "#FF7A2F"),
-                new Color(3, "YELLOW", "#F5C84C"),
-                new Color(4, "LIME", "#8FD14F"),
-                new Color(5, "GREEN", "#2FA66A"),
-                new Color(6, "SKY", "#35C9E8"),
-                new Color(7, "BLUE", "#2F6FE4"),
-                new Color(8, "NAVY", "#274B7A"),
-                new Color(9, "PURPLE", "#7C3AED"),
-                new Color(10, "PINK", "#F54B7D"),
-                new Color(11, "GRAY", "#9CA3AF"),
+                new Color(1, "RED", "#F21A14"),
+                new Color(2, "ORANGE", "#FA6E2C"),
+                new Color(3, "YELLOW", "#F8B420"),
+                new Color(4, "LIGHTGREEN", "#90D12C"),
+                new Color(5, "GREEN", "#219352"),
+                new Color(6, "LIGHTBLUE", "#2DE1F5"),
+                new Color(7, "BLUE", "#266BDE"),
+                new Color(8, "NAVY", "#1B4163"),
+                new Color(9, "PURPLE", "#7F32F1"),
+                new Color(10, "PINK", "#F7416B"),
+                new Color(11, "GREY", "#818285"),
                 new Color(12, "BLACK", "#2B2B2B")
         ));
     }
