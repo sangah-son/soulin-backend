@@ -42,8 +42,11 @@ public class PostController {
     }
 
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<PostDetailResponse> getPostDetail(@PathVariable Long postId){
-        PostDetailResponse response = postService.getPostDetail(postId);
+    public ResponseEntity<PostDetailResponse> getPostDetail(
+            @AuthenticationPrincipal CustomUserPrincipal principal,
+            @PathVariable Long postId
+    ){
+        PostDetailResponse response = postService.getPostDetail(principal.getUserId(), postId);
         return ResponseEntity.ok(response);
     }
 

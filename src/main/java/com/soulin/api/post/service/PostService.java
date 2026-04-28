@@ -18,6 +18,8 @@ import com.soulin.api.post.dto.PublishPostResponse;
 import com.soulin.api.post.dto.UpdatePostRequest;
 import com.soulin.api.post.entity.Post;
 import com.soulin.api.post.repository.PostRepository;
+import com.soulin.api.reaction.dto.MyPostReactionResponse;
+import com.soulin.api.reaction.dto.ReceivedReactionItem;
 import com.soulin.api.reaction.repository.PostReactionRepository;
 import com.soulin.api.user.entity.User;
 import com.soulin.api.user.repository.UserRepository;
@@ -56,18 +58,8 @@ public class PostService {
 
         Post savedPost = postRepository.save(post);
 
-        return new PostDetailResponse(
-                savedPost.getPostId(),
-                savedPost.getTitle(),
-                savedPost.getContent(),
-                savedPost.getIsPublic(),
-                savedPost.getColor().getColorId(),
-                savedPost.getUser().getId(),
-                savedPost.getUser().getUserName(),
-                savedPost.getStatus(),
-                savedPost.getCreatedAt(),
-                savedPost.getUpdatedAt()
-        );
+        // 새 글에는 리액션이 없으므로 myReaction, receivedReactions는 null, totalReactionCount는 0
+        return buildPostDetailResponse(savedPost, userId);
     }
 
     @Transactional(readOnly = true)
@@ -105,7 +97,7 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PostDetailResponse getPostDetail(Long postId){
+    public PostDetailResponse getPostDetail(Long userId, Long postId){
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
@@ -113,18 +105,7 @@ public class PostService {
             throw new IllegalArgumentException("공개된 게시글만 조회할 수 있습니다.");
         }
 
-        return new PostDetailResponse(
-                post.getPostId(),
-                post.getTitle(),
-                post.getContent(),
-                post.getIsPublic(),
-                post.getColor().getColorId(),
-                post.getUser().getId(),
-                post.getUser().getUserName(),
-                post.getStatus(),
-                post.getCreatedAt(),
-                post.getUpdatedAt()
-        );
+        return buildPostDetailResponse(post, userId);
     }
 
     @Transactional(readOnly = true)
@@ -133,18 +114,7 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
         validatePostOwner(userId, post);
 
-        return new PostDetailResponse(
-                post.getPostId(),
-                post.getTitle(),
-                post.getContent(),
-                post.getIsPublic(),
-                post.getColor().getColorId(),
-                post.getUser().getId(),
-                post.getUser().getUserName(),
-                post.getStatus(),
-                post.getCreatedAt(),
-                post.getUpdatedAt()
-        );
+        return buildPostDetailResponse(post, userId);
     }
 
     public PostDetailResponse updatePost(Long userId, Long postId, UpdatePostRequest request){
@@ -162,18 +132,7 @@ public class PostService {
                 color
         );
 
-        return new PostDetailResponse(
-                post.getPostId(),
-                post.getTitle(),
-                post.getContent(),
-                post.getIsPublic(),
-                post.getColor().getColorId(),
-                post.getUser().getId(),
-                post.getUser().getUserName(),
-                post.getStatus(),
-                post.getCreatedAt(),
-                post.getUpdatedAt()
-        );
+        return buildPostDetailResponse(post, userId);
     }
 
     public void deletePost(Long userId, Long postId){
@@ -247,5 +206,49 @@ public class PostService {
         if (!post.getUser().getId().equals(userId)) {
             throw new IllegalArgumentException("본인 게시글만 처리할 수 있습니다.");
         }
+    }
+
+    /**
+     * PostDetailResponse 공통 빌더.
+     * - myReaction: 호출자가 이 글에 남긴 리액션. 안 남겼으면 null.
+     * - receivedReactions: (텍스트+색) 조합별 카운트 리스트. 0건이면 null.
+     * - totalReactionCount: 이 글이 받은 리액션 총 개수.
+     */
+    private PostDetailResponse buildPostDetailResponse(Post post, Long userId) {
+        MyPostReactionResponse myReaction = postReactionRepository
+                .findByPost_PostIdAndUser_Id(post.getPostId(), userId)
+                .map(pr -> new MyPostReactionResponse(
+                        pr.getPostReactionId(),
+                        pr.getReactionType().getReactionTypeId(),
+                        pr.getReactionType().getReactionName(),
+                        pr.getReactionType().getReactionText(),
+                        pr.getColor().getColorId(),
+                        pr.getColor().getColorName(),
+                        pr.getColor().getColorCode()
+                ))
+                .orElse(null);
+
+        List<ReceivedReactionItem> received =
+                postReactionRepository.findReceivedReactionsByPostId(post.getPostId());
+        List<ReceivedReactionItem> receivedReactions =
+                (received == null || received.isEmpty()) ? null : received;
+
+        long totalCount = postReactionRepository.countByPost_PostId(post.getPostId());
+
+        return new PostDetailResponse(
+                post.getPostId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getIsPublic(),
+                post.getColor().getColorId(),
+                post.getUser().getId(),
+                post.getUser().getUserName(),
+                post.getStatus(),
+                post.getCreatedAt(),
+                post.getUpdatedAt(),
+                myReaction,
+                receivedReactions,
+                (int) totalCount
+        );
     }
 }
