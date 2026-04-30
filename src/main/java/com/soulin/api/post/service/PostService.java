@@ -3,6 +3,7 @@ package com.soulin.api.post.service;
 import com.soulin.api.color.entity.Color;
 import com.soulin.api.color.repository.ColorRepository;
 import com.soulin.api.bookmark.repository.BookmarkRepository;
+import com.soulin.api.global.common.TimeZoneUtils;
 import com.soulin.api.moderation.ModerationStatus;
 import com.soulin.api.moderation.dto.ModerationResult;
 import com.soulin.api.moderation.entity.Moderation;
@@ -77,8 +78,8 @@ public class PostService {
                         post.getStatus(),
                         post.getColor().getColorId(),
                         post.getUser().getUserName(),
-                        post.getCreatedAt(),
-                        post.getUpdatedAt()
+                        TimeZoneUtils.toKst(post.getCreatedAt()),
+                        TimeZoneUtils.toKst(post.getUpdatedAt())
                 ))
                 .toList();
     }
@@ -160,7 +161,7 @@ public class PostService {
                         post.getColor().getColorId(),
                         post.getUser().getId(),
                         post.getUser().getUserName(),
-                        post.getCreatedAt()
+                        TimeZoneUtils.toKst(post.getCreatedAt())
                 ))
                 .toList();
     }
@@ -244,8 +245,8 @@ public class PostService {
                 post.getUser().getId(),
                 post.getUser().getUserName(),
                 post.getStatus(),
-                post.getCreatedAt(),
-                post.getUpdatedAt(),
+                TimeZoneUtils.toKst(post.getCreatedAt()),
+                TimeZoneUtils.toKst(post.getUpdatedAt()),
                 myReaction,
                 receivedReactions,
                 (int) totalCount

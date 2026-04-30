@@ -3,7 +3,7 @@ package com.soulin.api.bookmark.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Getter
 @AllArgsConstructor
@@ -14,5 +14,5 @@ public class BookmarkPostResponse {
     private String content;
     private Integer colorId;
     private String userName;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 }

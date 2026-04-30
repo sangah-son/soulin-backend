@@ -4,6 +4,7 @@ import com.soulin.api.bookmark.dto.BookmarkPostResponse;
 import com.soulin.api.bookmark.dto.BookmarkResponse;
 import com.soulin.api.bookmark.entity.Bookmark;
 import com.soulin.api.bookmark.repository.BookmarkRepository;
+import com.soulin.api.global.common.TimeZoneUtils;
 import com.soulin.api.post.PostStatus;
 import com.soulin.api.post.entity.Post;
 import com.soulin.api.post.repository.PostRepository;
@@ -42,7 +43,7 @@ public class BookmarkService {
                 savedBookmark.getBookmarkId(),
                 savedBookmark.getPost().getPostId(),
                 savedBookmark.getUser().getId(),
-                savedBookmark.getCreatedAt()
+                TimeZoneUtils.toKst(savedBookmark.getCreatedAt())
         );
     }
 
@@ -72,7 +73,7 @@ public class BookmarkService {
                         bookmark.getPost().getContent(),
                         bookmark.getPost().getColor().getColorId(),
                         bookmark.getPost().getUser().getUserName(),
-                        bookmark.getCreatedAt()
+                        TimeZoneUtils.toKst(bookmark.getCreatedAt())
                 ))
                 .toList();
     }

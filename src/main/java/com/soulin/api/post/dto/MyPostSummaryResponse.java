@@ -4,7 +4,7 @@ import com.soulin.api.post.PostStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Getter
 @AllArgsConstructor
@@ -16,6 +16,6 @@ public class MyPostSummaryResponse {
     private PostStatus status;
     private Integer colorId;
     private String userName;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }

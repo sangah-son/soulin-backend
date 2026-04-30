@@ -3,7 +3,7 @@ package com.soulin.api.reaction.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Getter
 @AllArgsConstructor
@@ -13,5 +13,5 @@ public class PostReactionResponse {
     private Long userId;
     private Integer colorId;
     private Integer reactionTypeId;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 }

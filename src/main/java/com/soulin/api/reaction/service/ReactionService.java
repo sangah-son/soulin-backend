@@ -2,6 +2,7 @@ package com.soulin.api.reaction.service;
 
 import com.soulin.api.color.entity.Color;
 import com.soulin.api.color.repository.ColorRepository;
+import com.soulin.api.global.common.TimeZoneUtils;
 import com.soulin.api.post.PostStatus;
 import com.soulin.api.post.entity.Post;
 import com.soulin.api.post.repository.PostRepository;
@@ -81,7 +82,7 @@ public class ReactionService {
                 savedPostReaction.getUser().getId(),
                 savedPostReaction.getColor().getColorId(),
                 savedPostReaction.getReactionType().getReactionTypeId(),
-                savedPostReaction.getCreatedAt()
+                TimeZoneUtils.toKst(savedPostReaction.getCreatedAt())
         );
     }
 
@@ -111,7 +112,7 @@ public class ReactionService {
                 postReaction.getUser().getId(),
                 postReaction.getColor().getColorId(),
                 postReaction.getReactionType().getReactionTypeId(),
-                postReaction.getCreatedAt()
+                TimeZoneUtils.toKst(postReaction.getCreatedAt())
         );
     }
 
