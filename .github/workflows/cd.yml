@@ -64,6 +64,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
+            docker system prune -f
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/soulin-backend:${{ needs.build-and-push.outputs.tag }}
             cd ~/soulin/backend
             docker compose pull
