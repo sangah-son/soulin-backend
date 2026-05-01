@@ -1,10 +1,6 @@
 package com.soulin.api.auth.controller;
 
-import com.soulin.api.auth.dto.LoginRequest;
-import com.soulin.api.auth.dto.LoginResponse;
-import com.soulin.api.auth.dto.LogoutResponse;
-import com.soulin.api.auth.dto.SignupRequest;
-import com.soulin.api.auth.dto.SignupResponse;
+import com.soulin.api.auth.dto.*;
 import com.soulin.api.auth.service.AuthService;
 import com.soulin.api.global.jwt.CustomUserPrincipal;
 import jakarta.validation.Valid;
@@ -39,7 +35,18 @@ public class AuthController {
     public ResponseEntity<LogoutResponse> logout(
             @AuthenticationPrincipal CustomUserPrincipal principal
     ){
-        LogoutResponse response = authService.logout(principal.getUserId());
+        LogoutResponse response = authService.logout(
+                principal.getUserId(),
+                principal.getSessionId()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<TokenReissueResponse> reissue(
+            @Valid @RequestBody TokenReissueRequest request
+    ){
+        TokenReissueResponse response=authService.reissue(request);
         return ResponseEntity.ok(response);
     }
 }

@@ -20,8 +20,8 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
-
-    @Column(nullable = false, unique = true, length = 255)  //colum name 안쓰면 필드명과 동일하게 사용됨
+    
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
     @Column(nullable = false, length = 255)
@@ -29,6 +29,9 @@ public class User extends BaseEntity {
 
     @Column(name = "user_name", nullable = false, length = 100)
     private String userName;
+
+    @Column(name = "token_version", nullable = false)
+    private Long tokenVersion = 0L;
 
     public User(String email, String password, String userName) {
         this.email = email;
@@ -46,5 +49,9 @@ public class User extends BaseEntity {
     }
     public void updatePassword(String password){
         this.password=password;
+    }
+
+    public void increaseTokenVersion() {
+        this.tokenVersion++;
     }
 }

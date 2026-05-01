@@ -9,4 +9,5 @@ public class CustomUserPrincipal {
     private Long userId;
     private String email;
     private String userName;
+    private String sessionId;
 }

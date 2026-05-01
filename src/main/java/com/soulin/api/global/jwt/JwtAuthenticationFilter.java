@@ -1,6 +1,8 @@
 package com.soulin.api.global.jwt;
 
 
+import com.soulin.api.auth.entity.RefreshToken;
+import com.soulin.api.auth.repository.RefreshTokenRepository;
 import com.soulin.api.user.entity.User;
 import com.soulin.api.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -23,6 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -40,10 +43,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 User user = userRepository.findById(userId)
                         .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
+                Long tokenVersion = jwtTokenProvider.getTokenVersion(token);
+                if (!user.getTokenVersion().equals(tokenVersion)) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                String sessionId = jwtTokenProvider.getSessionIdFromAccessToken(token);
+                RefreshToken refreshToken = refreshTokenRepository.findBySessionId(sessionId)
+                        .orElse(null);
+
+                if (refreshToken == null || refreshToken.isRevoked()) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
                 CustomUserPrincipal principal = new CustomUserPrincipal(
                         user.getId(),
                         user.getEmail(),
-                        user.getUserName()
+                        user.getUserName(),
+                        sessionId
                 );
 
                 UsernamePasswordAuthenticationToken authentication =
