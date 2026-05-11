@@ -4,6 +4,8 @@ import com.soulin.api.color.entity.Color;
 import com.soulin.api.color.repository.ColorRepository;
 import com.soulin.api.bookmark.repository.BookmarkRepository;
 import com.soulin.api.global.common.TimeZoneUtils;
+import com.soulin.api.global.exception.ConflictException;
+import com.soulin.api.global.exception.ForbiddenException;
 import com.soulin.api.moderation.ModerationStatus;
 import com.soulin.api.moderation.dto.ModerationResult;
 import com.soulin.api.moderation.entity.Moderation;
@@ -28,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -150,8 +153,8 @@ public class PostService {
     @Transactional(readOnly = true)
     public List<PostSummaryResponse> getPosts(Integer colorId){
         List<Post> posts = colorId == null
-                ? postRepository.findAllByStatusAndIsPublicOrderByCreatedAtDesc(PostStatus.PUBLISHED, true)
-                : postRepository.findAllByStatusAndIsPublicAndColor_ColorIdOrderByCreatedAtDesc(PostStatus.PUBLISHED, true, colorId);
+                ? postRepository.findPublicPostsOrderByPublishedAtDesc(PostStatus.PUBLISHED, true)
+                : postRepository.findPublicPostsByColorOrderByPublishedAtDesc(PostStatus.PUBLISHED, true, colorId);
 
         return posts.stream()
                 .map(post -> new PostSummaryResponse(
@@ -161,7 +164,7 @@ public class PostService {
                         post.getColor().getColorId(),
                         post.getUser().getId(),
                         post.getUser().getUserName(),
-                        TimeZoneUtils.toKst(post.getCreatedAt())
+                        TimeZoneUtils.toKst(getPublishedAtOrCreatedAt(post))
                 ))
                 .toList();
     }
@@ -170,6 +173,7 @@ public class PostService {
         Post post = postRepository.findById(request.getPostId())
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
         validatePostOwner(userId, post);
+        validatePublishable(post);
 
         ModerationResult moderationResult = moderationService.moderate(
                 post.getTitle(),
@@ -205,8 +209,22 @@ public class PostService {
 
     private void validatePostOwner(Long userId, Post post){
         if (!post.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("본인 게시글만 처리할 수 있습니다.");
+            throw new ForbiddenException("본인 게시글만 처리할 수 있습니다.");
         }
+    }
+
+    private void validatePublishable(Post post) {
+        if (post.getStatus() == PostStatus.PUBLISHED) {
+            throw new ConflictException("이미 게시된 글입니다.");
+        }
+
+        if (post.getStatus() == PostStatus.REJECTED) {
+            throw new ConflictException("반려된 글은 다시 게시할 수 없습니다.");
+        }
+    }
+
+    private LocalDateTime getPublishedAtOrCreatedAt(Post post) {
+        return post.getPublishedAt() != null ? post.getPublishedAt() : post.getCreatedAt();
     }
 
     /**

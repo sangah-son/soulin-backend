@@ -9,6 +9,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name="posts")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,6 +29,9 @@ public class Post extends BaseEntity{
 
     @Column(name="is_public", nullable = false)
     private Boolean isPublic;
+
+    @Column(name = "published_at")
+    private LocalDateTime publishedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -58,6 +63,7 @@ public class Post extends BaseEntity{
 
     public void publish(){
         this.status=PostStatus.PUBLISHED;
+        this.publishedAt=LocalDateTime.now();
     }
 
     public void reject(){
