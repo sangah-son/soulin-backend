@@ -14,7 +14,7 @@ import java.util.Set;
 @Service
 public class ModerationService {
     private static final String MODERATION_API_URL = "https://MINSEONG12-moderation.hf.space/moderate";
-    private static final double DEFAULT_THRESHOLD = 0.5;
+    private static final double DEFAULT_THRESHOLD = 0.7;
 
     private static final Set<String> BLOCKED_LABELS = Set.of(
             "ABUSE",
