@@ -1,6 +1,7 @@
 package com.soulin.api.mypage.controller;
 
 import com.soulin.api.global.jwt.CustomUserPrincipal;
+import com.soulin.api.mypage.dto.ColorStatsResponse;
 import com.soulin.api.mypage.dto.MypageSummaryResponse;
 import com.soulin.api.mypage.dto.RepresentativePostRequest;
 import com.soulin.api.mypage.dto.RepresentativePostResponse;
@@ -33,6 +34,17 @@ public class MypageController {
             @RequestParam int month
     ) {
         MypageSummaryResponse response = mypageService.getMypageSummary(principal.getUserId(), year, month);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/mypage/color-stats")
+    public ResponseEntity<ColorStatsResponse> getColorStats(
+            @AuthenticationPrincipal CustomUserPrincipal principal,
+            @RequestParam(required = false) String range,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        ColorStatsResponse response = mypageService.getColorStats(principal.getUserId(), range, startDate, endDate);
         return ResponseEntity.ok(response);
     }
 

@@ -1,6 +1,8 @@
 package com.soulin.api.mypage.service;
 
 import com.soulin.api.color.entity.Color;
+import com.soulin.api.color.repository.ColorRepository;
+import com.soulin.api.mypage.dto.ColorStatsResponse;
 import com.soulin.api.mypage.dto.MypageSummaryResponse;
 import com.soulin.api.mypage.dto.RepresentativePostRequest;
 import com.soulin.api.mypage.dto.RepresentativePostResponse;
@@ -33,6 +35,7 @@ public class MypageService {
     private final PostRepository postRepository;
     private final PostReactionRepository postReactionRepository;
     private final DailyRepresentativePostRepository dailyRepresentativePostRepository;
+    private final ColorRepository colorRepository;
 
     @Transactional(readOnly = true)
     public MypageSummaryResponse getMypageSummary(Long userId, int year, int month) {
@@ -81,6 +84,63 @@ public class MypageService {
                 calendarDays,
                 colorStats
         );
+    }
+
+    @Transactional(readOnly = true)
+    public ColorStatsResponse getColorStats(Long userId, String range, LocalDate startDate, LocalDate endDate) {
+        User user = findUser(userId);
+        LocalDate[] effectiveRange = resolveRange(range, startDate, endDate);
+        LocalDate effectiveStart = effectiveRange[0];
+        LocalDate effectiveEnd = effectiveRange[1];
+
+        List<Post> posts = postRepository.findUserPostsWithColorByStatusAndDateRangeAsc(
+                user,
+                PostStatus.PUBLISHED,
+                effectiveStart.atStartOfDay(),
+                effectiveEnd.plusDays(1).atStartOfDay()
+        );
+
+        int totalCount = posts.size();
+        Map<Integer, Long> colorCountMap = posts.stream()
+                .collect(Collectors.groupingBy(post -> post.getColor().getColorId(), Collectors.counting()));
+
+        List<ColorStatsResponse.ColorStatItem> colorStats = colorRepository.findAllByOrderByColorIdAsc().stream()
+                .map(color -> {
+                    long count = colorCountMap.getOrDefault(color.getColorId(), 0L);
+                    double percentage = totalCount == 0 ? 0.0 : count * 100.0 / totalCount;
+                    return new ColorStatsResponse.ColorStatItem(
+                            color.getColorId(),
+                            color.getColorName(),
+                            color.getColorCode(),
+                            (int) count,
+                            percentage
+                    );
+                })
+                .toList();
+
+        return new ColorStatsResponse(effectiveStart, effectiveEnd, totalCount, colorStats);
+    }
+
+    private LocalDate[] resolveRange(String range, LocalDate startDate, LocalDate endDate) {
+        if (startDate != null && endDate != null) {
+            if (startDate.isAfter(endDate)) {
+                throw new IllegalArgumentException("시작일이 종료일보다 늦을 수 없습니다.");
+            }
+            return new LocalDate[]{startDate, endDate};
+        }
+        if (startDate != null || endDate != null) {
+            throw new IllegalArgumentException("startDate와 endDate는 함께 지정해야 합니다.");
+        }
+
+        LocalDate today = LocalDate.now();
+        String effectiveRange = (range == null || range.isBlank()) ? "1m" : range;
+        LocalDate computedStart = switch (effectiveRange) {
+            case "1m" -> today.minusMonths(1);
+            case "3m" -> today.minusMonths(3);
+            case "6m" -> today.minusMonths(6);
+            default -> throw new IllegalArgumentException("허용되지 않은 range 값입니다. (1m, 3m, 6m)");
+        };
+        return new LocalDate[]{computedStart, today};
     }
 
     public RepresentativePostResponse selectRepresentativePost(
