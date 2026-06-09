@@ -5,11 +5,13 @@ import com.soulin.api.post.dto.*;
 import com.soulin.api.post.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -35,9 +37,10 @@ public class PostController {
     @GetMapping("/users/me/posts")
     public ResponseEntity<List<MyPostSummaryResponse>> getMyPosts(
             @AuthenticationPrincipal CustomUserPrincipal principal,
-            @RequestParam(required = false) String tab
+            @RequestParam(required = false) String tab,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ){
-        List<MyPostSummaryResponse> response = postService.getMyPosts(principal.getUserId(), tab);
+        List<MyPostSummaryResponse> response = postService.getMyPosts(principal.getUserId(), tab, date);
         return ResponseEntity.ok(response);
     }
 

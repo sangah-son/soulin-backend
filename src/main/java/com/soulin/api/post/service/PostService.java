@@ -4,6 +4,7 @@ import com.soulin.api.color.entity.Color;
 import com.soulin.api.color.repository.ColorRepository;
 import com.soulin.api.bookmark.repository.BookmarkRepository;
 import com.soulin.api.global.common.TimeZoneUtils;
+import com.soulin.api.mypage.repository.DailyRepresentativePostRepository;
 import com.soulin.api.global.exception.ConflictException;
 import com.soulin.api.global.exception.ForbiddenException;
 import com.soulin.api.moderation.ModerationStatus;
@@ -30,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,6 +46,7 @@ public class PostService {
     private final PostReactionRepository postReactionRepository;
     private final ModerationRepository moderationRepository;
     private final ModerationService moderationService;
+    private final DailyRepresentativePostRepository dailyRepresentativePostRepository;
 
     public PostDetailResponse createDraftPost(Long userId, CreatePostRequest request){
         User user = userRepository.findById(userId)
@@ -67,10 +70,17 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<MyPostSummaryResponse> getMyPosts(Long userId, String tab){
+    public List<MyPostSummaryResponse> getMyPosts(Long userId, String tab, LocalDate date){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        List<Post> posts = findMyPostsByTab(user, tab);
+        List<Post> posts = date != null
+                ? postRepository.findUserPostsWithColorByStatusAndDateRangeDesc(
+                        user,
+                        PostStatus.PUBLISHED,
+                        date.atStartOfDay(),
+                        date.plusDays(1).atStartOfDay()
+                )
+                : findMyPostsByTab(user, tab);
 
         return posts.stream()
                 .map(post -> new MyPostSummaryResponse(
@@ -147,6 +157,7 @@ public class PostService {
         bookmarkRepository.deleteAllByPost(post);
         postReactionRepository.deleteAllByPost(post);
         moderationRepository.deleteAllByPost(post);
+        dailyRepresentativePostRepository.deleteAllByPost(post);
         postRepository.delete(post);
     }
 

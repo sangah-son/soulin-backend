@@ -39,4 +39,5 @@ public interface PostReactionRepository extends JpaRepository<PostReaction,Long>
     List<ReceivedReactionItem> findReceivedReactionsByPostId(@Param("postId") Long postId);
 
     long countByPost_PostId(Long postId);
+    long countByPost_User_Id(Long userId);
 }
