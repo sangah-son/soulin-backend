@@ -16,6 +16,7 @@ public interface PostReactionRepository extends JpaRepository<PostReaction,Long>
     Optional<PostReaction> findByPostAndUser(Post post, User user);
     List<PostReaction> findAllByPost(Post post);
     void deleteAllByPost(Post post);
+    void deleteAllByUser(User user);
     List<PostReaction> findAllByPostIn(List<Post> posts);
     List<PostReaction> findAllByPostInOrderByCreatedAtDesc(List<Post> posts);
 

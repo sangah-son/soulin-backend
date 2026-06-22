@@ -26,11 +26,15 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final EmailVerificationService emailVerificationService;
 
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
 
     public SignupResponse signup(SignupRequest request) {
+        if (!emailVerificationService.isVerified(request.getEmail())) {
+            throw new IllegalArgumentException("이메일 인증이 완료되지 않았습니다.");
+        }
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
@@ -41,6 +45,7 @@ public class AuthService {
                 request.getUserName()
         );
         User savedUser = userRepository.save(user);
+        emailVerificationService.deleteVerification(request.getEmail());
         return new SignupResponse(
                 savedUser.getId(),
                 savedUser.getEmail(),

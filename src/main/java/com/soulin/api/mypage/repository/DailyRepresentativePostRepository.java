@@ -24,4 +24,5 @@ public interface DailyRepresentativePostRepository extends JpaRepository<DailyRe
     );
 
     void deleteAllByPost(Post post);
+    void deleteAllByUser(User user);
 }

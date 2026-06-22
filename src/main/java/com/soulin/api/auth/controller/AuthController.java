@@ -2,6 +2,7 @@ package com.soulin.api.auth.controller;
 
 import com.soulin.api.auth.dto.*;
 import com.soulin.api.auth.service.AuthService;
+import com.soulin.api.auth.service.EmailVerificationService;
 import com.soulin.api.global.jwt.CustomUserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class AuthController {
     private final AuthService authService;
+    private final EmailVerificationService emailVerificationService;
+
+    @PostMapping("/email/send-code")
+    public ResponseEntity<Void> sendVerificationCode(@Valid @RequestBody SendVerificationCodeRequest request) {
+        emailVerificationService.sendCode(request.getEmail());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/email/verify")
+    public ResponseEntity<Void> verifyCode(@Valid @RequestBody VerifyCodeRequest request) {
+        emailVerificationService.verifyCode(request.getEmail(), request.getCode());
+        return ResponseEntity.ok().build();
+    }
 
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(@Valid @RequestBody SignupRequest request){

@@ -40,4 +40,12 @@ public class UserController {
         UpdatePasswordResponse response = userService.updateMyPassword(principal.getUserId(), request);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteAccount(
+            @AuthenticationPrincipal CustomUserPrincipal principal
+    ){
+        userService.deleteAccount(principal.getUserId());
+        return ResponseEntity.noContent().build();
+    }
 }
