@@ -176,7 +176,7 @@ public class MypageService {
             throw new IllegalArgumentException("본인 게시글만 대표 글로 선택할 수 있습니다.");
         }
 
-        if (post.getStatus() != PostStatus.PUBLISHED) {
+        if (post.getStatus() != PostStatus.PUBLISHED || !post.getIsPublic()) {
             throw new IllegalArgumentException("게시 완료된 글만 대표 글로 선택할 수 있습니다.");
         }
 

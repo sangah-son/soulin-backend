@@ -1,10 +1,13 @@
 package com.soulin.api.global.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -21,6 +24,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(IllegalArgumentException e) {
         return buildResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException e) {
+        String message = e.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .findFirst()
+                .orElse("요청값 검증에 실패했습니다.");
+        return buildResponse(HttpStatus.BAD_REQUEST, message);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleUnexpected(Exception e) {
+        log.error("Unhandled exception occurred", e);
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "서버 처리 중 오류가 발생했습니다.");
     }
 
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String message) {

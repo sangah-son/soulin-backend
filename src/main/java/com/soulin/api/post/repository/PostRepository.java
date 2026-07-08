@@ -27,7 +27,7 @@ public interface PostRepository extends JpaRepository<Post,Long> {
             LocalDateTime endDateTime
     );
     @Query("select p from Post p join fetch p.color join fetch p.user " +
-            "where p.user = :user and p.status = :status " +
+            "where p.user = :user and p.status = :status and p.isPublic = true " +
             "and p.createdAt >= :start and p.createdAt < :end " +
             "order by p.createdAt asc")
     List<Post> findUserPostsWithColorByStatusAndDateRangeAsc(
