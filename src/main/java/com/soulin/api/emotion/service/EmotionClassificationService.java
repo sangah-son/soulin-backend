@@ -53,6 +53,8 @@ public class EmotionClassificationService {
                     confidence);
             return new EmotionResult(body.getEmotion(), confidence);
         } catch (RestClientException e) {
+            long elapsedMs = System.currentTimeMillis() - startedAt;
+            log.warn("Emotion API failed. elapsedMs={}", elapsedMs, e);
             throw new IllegalStateException("감정 분류 서버 호출에 실패했습니다.", e);
         }
     }
