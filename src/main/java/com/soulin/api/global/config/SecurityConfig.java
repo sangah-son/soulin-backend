@@ -82,7 +82,10 @@ public class SecurityConfig {
                 "http://127.0.0.1:5179",
                 "http://127.0.0.1:5180",
                 "https://soulin.xyz",
-                "https://app.soulin.xyz"
+                "https://app.soulin.xyz",
+                "https://soulin.kr",
+                "https://www.soulin.kr",
+                "https://app.soulin.kr"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

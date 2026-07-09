@@ -28,7 +28,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         "http://localhost:*",
                         "http://127.0.0.1:*",
                         "https://soulin.xyz",
-                        "https://app.soulin.xyz"
+                        "https://app.soulin.xyz",
+                        "https://soulin.kr",
+                        "https://www.soulin.kr",
+                        "https://app.soulin.kr"
                 );
     }
 
