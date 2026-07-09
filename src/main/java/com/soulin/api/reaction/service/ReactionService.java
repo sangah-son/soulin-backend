@@ -3,6 +3,7 @@ package com.soulin.api.reaction.service;
 import com.soulin.api.color.entity.Color;
 import com.soulin.api.color.repository.ColorRepository;
 import com.soulin.api.global.common.TimeZoneUtils;
+import com.soulin.api.notification.service.NotificationService;
 import com.soulin.api.post.PostStatus;
 import com.soulin.api.post.entity.Post;
 import com.soulin.api.post.repository.PostRepository;
@@ -42,6 +43,7 @@ public class ReactionService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final ColorRepository colorRepository;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public List<ReactionTypeResponse> getReactionTypes(){
@@ -75,6 +77,7 @@ public class ReactionService {
 
         PostReaction postReaction = new PostReaction(reactionType, user, post, color);
         PostReaction savedPostReaction = postReactionRepository.save(postReaction);
+        notificationService.createReactionNotification(user, post, reactionType, color);
 
         return new PostReactionResponse(
                 savedPostReaction.getPostReactionId(),
