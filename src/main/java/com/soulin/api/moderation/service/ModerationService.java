@@ -5,6 +5,7 @@ import com.soulin.api.moderation.dto.ModerationApiRequest;
 import com.soulin.api.moderation.dto.ModerationApiResponse;
 import com.soulin.api.moderation.dto.ModerationResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -12,15 +13,14 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
 @Service
 public class ModerationService {
-    private static final String MODERATION_API_URL = "https://MINSEONG12-moderation.hf.space/moderate";
     private static final double DEFAULT_THRESHOLD = 0.7;
-    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(3);
-    private static final Duration READ_TIMEOUT = Duration.ofSeconds(8);
+    private static final String MODERATION_API_FAILED_LABEL = "MODERATION_API_FAILED";
 
     private static final Set<String> BLOCKED_LABELS = Set.of(
             "ABUSE",
@@ -33,11 +33,21 @@ public class ModerationService {
     );
 
     private final RestTemplate restTemplate;
+    private final String moderationApiUrl;
+    private final boolean failOpen;
 
-    public ModerationService(RestTemplateBuilder restTemplateBuilder) {
+    public ModerationService(
+            RestTemplateBuilder restTemplateBuilder,
+            @Value("${app.moderation.api-url:https://minseong12-moderation.hf.space/moderate}") String moderationApiUrl,
+            @Value("${app.moderation.connect-timeout-ms:5000}") long connectTimeoutMs,
+            @Value("${app.moderation.read-timeout-ms:20000}") long readTimeoutMs,
+            @Value("${app.moderation.fail-open:true}") boolean failOpen
+    ) {
+        this.moderationApiUrl = moderationApiUrl;
+        this.failOpen = failOpen;
         this.restTemplate = restTemplateBuilder
-                .connectTimeout(CONNECT_TIMEOUT)
-                .readTimeout(READ_TIMEOUT)
+                .connectTimeout(Duration.ofMillis(connectTimeoutMs))
+                .readTimeout(Duration.ofMillis(readTimeoutMs))
                 .build();
     }
 
@@ -48,7 +58,7 @@ public class ModerationService {
 
         try {
             ResponseEntity<ModerationApiResponse> response = restTemplate.postForEntity(
-                    MODERATION_API_URL,
+                    moderationApiUrl,
                     request,
                     ModerationApiResponse.class
             );
@@ -59,32 +69,40 @@ public class ModerationService {
                 throw new IllegalStateException("모더레이션 응답이 비어 있습니다.");
             }
 
+            List<String> labels = body.getOverall_labels() == null ? List.of() : body.getOverall_labels();
             long elapsedMs = System.currentTimeMillis() - startedAt;
             log.info("Moderation API succeeded. elapsedMs={}, harmful={}, labels={}",
                     elapsedMs,
                     body.is_harmful(),
-                    body.getOverall_labels());
+                    labels);
 
-            boolean hasBlockedLabel = body.getOverall_labels().stream()
+            boolean hasBlockedLabel = labels.stream()
                     .anyMatch(BLOCKED_LABELS::contains);
 
             if (body.is_harmful() || hasBlockedLabel) {
-                String reason = String.join(", ", body.getOverall_labels());
+                String reason = String.join(", ", labels);
                 return new ModerationResult(
                         ModerationStatus.REJECTED,
                         reason,
-                        body.getOverall_labels()
+                        labels
                 );
             }
 
             return new ModerationResult(
                     ModerationStatus.APPROVED,
                     null,
-                    body.getOverall_labels()
+                    labels
             );
-        } catch (RestClientException e) {
+        } catch (RestClientException | IllegalStateException e) {
             long elapsedMs = System.currentTimeMillis() - startedAt;
-            log.warn("Moderation API failed. elapsedMs={}", elapsedMs, e);
+            log.warn("Moderation API failed. elapsedMs={}, failOpen={}", elapsedMs, failOpen, e);
+            if (failOpen) {
+                return new ModerationResult(
+                        ModerationStatus.APPROVED,
+                        MODERATION_API_FAILED_LABEL,
+                        List.of(MODERATION_API_FAILED_LABEL)
+                );
+            }
             throw new IllegalStateException("모더레이션 서버 호출에 실패했습니다.", e);
         }
     }

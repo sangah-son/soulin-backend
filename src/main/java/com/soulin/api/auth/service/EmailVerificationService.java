@@ -22,8 +22,8 @@ public class EmailVerificationService {
     private final EmailVerificationRepository emailVerificationRepository;
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}")
-    private String mailUsername;
+    @Value("${app.mail.from}")
+    private String mailFrom;
 
     public void sendCode(String email) {
         // 기존 인증 내역 삭제
@@ -35,7 +35,7 @@ public class EmailVerificationService {
         emailVerificationRepository.save(new EmailVerification(email, code, expiresAt));
 
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(mailUsername);
+        message.setFrom(mailFrom);
         message.setTo(email);
         message.setSubject("[스며듦] 이메일 인증 코드");
         message.setText("인증 코드: " + code + "\n\n5분 이내에 입력해주세요.");
