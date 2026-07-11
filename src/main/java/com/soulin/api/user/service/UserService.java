@@ -4,6 +4,7 @@ import com.soulin.api.auth.repository.RefreshTokenRepository;
 import com.soulin.api.bookmark.repository.BookmarkRepository;
 import com.soulin.api.moderation.repository.ModerationRepository;
 import com.soulin.api.mypage.repository.DailyRepresentativePostRepository;
+import com.soulin.api.notification.repository.NotificationRepository;
 import com.soulin.api.post.entity.Post;
 import com.soulin.api.post.repository.PostRepository;
 import com.soulin.api.reaction.repository.PostReactionRepository;
@@ -29,6 +30,7 @@ public class UserService {
     private final PostRepository postRepository;
     private final DailyRepresentativePostRepository dailyRepresentativePostRepository;
     private final ModerationRepository moderationRepository;
+    private final NotificationRepository notificationRepository;
 
     @Transactional(readOnly=true)
     public ProfileResponse getMyProfile(Long userId){
@@ -77,6 +79,7 @@ public class UserService {
         // 내 포스트에 달린 북마크/리액션/대표글 삭제 후 포스트 삭제
         List<Post> myPosts = postRepository.findAllByUser(user);
         for (Post post : myPosts) {
+            notificationRepository.deleteAllByPost(post);
             bookmarkRepository.deleteAllByPost(post);
             postReactionRepository.deleteAllByPost(post);
             dailyRepresentativePostRepository.deleteAllByPost(post);

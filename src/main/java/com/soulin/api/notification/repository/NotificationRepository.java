@@ -1,6 +1,7 @@
 package com.soulin.api.notification.repository;
 
 import com.soulin.api.notification.entity.Notification;
+import com.soulin.api.post.entity.Post;
 import com.soulin.api.user.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,4 +17,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     Optional<Notification> findByNotificationIdAndRecipient(Long notificationId, User recipient);
 
     List<Notification> findAllByRecipientAndReadFalse(User recipient);
+
+    void deleteAllByPost(Post post);
 }

@@ -12,6 +12,7 @@ import com.soulin.api.moderation.dto.ModerationResult;
 import com.soulin.api.moderation.entity.Moderation;
 import com.soulin.api.moderation.repository.ModerationRepository;
 import com.soulin.api.moderation.service.ModerationService;
+import com.soulin.api.notification.repository.NotificationRepository;
 import com.soulin.api.post.PostStatus;
 import com.soulin.api.post.dto.CreatePostRequest;
 import com.soulin.api.post.dto.MyPostSummaryResponse;
@@ -44,6 +45,7 @@ public class PostService {
     private final ColorRepository colorRepository;
     private final BookmarkRepository bookmarkRepository;
     private final PostReactionRepository postReactionRepository;
+    private final NotificationRepository notificationRepository;
     private final ModerationRepository moderationRepository;
     private final ModerationService moderationService;
     private final DailyRepresentativePostRepository dailyRepresentativePostRepository;
@@ -154,6 +156,7 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
         validatePostOwner(userId, post);
 
+        notificationRepository.deleteAllByPost(post);
         bookmarkRepository.deleteAllByPost(post);
         postReactionRepository.deleteAllByPost(post);
         moderationRepository.deleteAllByPost(post);
