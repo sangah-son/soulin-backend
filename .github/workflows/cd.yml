@@ -47,7 +47,7 @@ jobs:
           context: .
           platforms: linux/arm64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/soulin-backend:${{ steps.set-tag.outputs.tag }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/api-prod:${{ steps.set-tag.outputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
