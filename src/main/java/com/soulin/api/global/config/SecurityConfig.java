@@ -32,7 +32,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/signup", "/auth/login", "/auth/reissue", "/auth/email/send-code", "/auth/email/verify").permitAll()
+                        .requestMatchers(
+                                "/auth/signup",
+                                "/auth/login",
+                                "/auth/reissue",
+                                "/auth/email/send-code",
+                                "/auth/email/verify",
+                                "/auth/password-reset/**",
+                                "/auth/password-reset"
+                        ).permitAll()
                         .requestMatchers("/ws", "/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )

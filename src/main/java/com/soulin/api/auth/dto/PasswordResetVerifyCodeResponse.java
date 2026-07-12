@@ -1,0 +1,11 @@
+package com.soulin.api.auth.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class PasswordResetVerifyCodeResponse {
+    private String resetToken;
+    private long expiresIn;
+}

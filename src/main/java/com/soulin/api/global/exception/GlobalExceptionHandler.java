@@ -11,6 +11,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ErrorResponse> handleApiException(ApiException e) {
+        return ResponseEntity.status(e.getStatus())
+                .body(new ErrorResponse(
+                        e.getStatus().value(),
+                        e.getStatus().getReasonPhrase(),
+                        e.getCode(),
+                        e.getMessage()
+                ));
+    }
+
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException e) {
         return buildResponse(HttpStatus.FORBIDDEN, e.getMessage());
