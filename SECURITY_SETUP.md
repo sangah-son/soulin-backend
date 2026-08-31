@@ -13,6 +13,7 @@ Set the following values as environment variables in local, CI, and production e
 | `JWT_SECRET` | Secret key used to sign access and refresh tokens |
 | `MAIL_USERNAME` | SMTP sender account |
 | `MAIL_PASSWORD` | SMTP app password |
+| `CRISIS_DETECTION_API_KEY` | n8n crisis-detection webhook `x-api-key` value |
 
 ## Immediate Rotation Checklist
 

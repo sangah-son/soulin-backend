@@ -11,9 +11,9 @@ import com.soulin.api.moderation.ModerationStatus;
 import com.soulin.api.moderation.dto.ModerationResult;
 import com.soulin.api.moderation.entity.Moderation;
 import com.soulin.api.moderation.repository.ModerationRepository;
-import com.soulin.api.moderation.service.ModerationService;
 import com.soulin.api.notification.repository.NotificationRepository;
 import com.soulin.api.post.PostStatus;
+import com.soulin.api.post.PublishStatus;
 import com.soulin.api.post.dto.CreatePostRequest;
 import com.soulin.api.post.dto.MyPostSummaryResponse;
 import com.soulin.api.post.dto.PostDetailResponse;
@@ -26,6 +26,8 @@ import com.soulin.api.post.repository.PostRepository;
 import com.soulin.api.reaction.dto.MyPostReactionResponse;
 import com.soulin.api.reaction.dto.ReceivedReactionItem;
 import com.soulin.api.reaction.repository.PostReactionRepository;
+import com.soulin.api.safety.dto.ContentSafetyResult;
+import com.soulin.api.safety.service.ContentSafetyService;
 import com.soulin.api.user.entity.User;
 import com.soulin.api.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +49,7 @@ public class PostService {
     private final PostReactionRepository postReactionRepository;
     private final NotificationRepository notificationRepository;
     private final ModerationRepository moderationRepository;
-    private final ModerationService moderationService;
+    private final ContentSafetyService contentSafetyService;
     private final DailyRepresentativePostRepository dailyRepresentativePostRepository;
 
     public PostDetailResponse createDraftPost(Long userId, CreatePostRequest request){
@@ -189,24 +191,36 @@ public class PostService {
         validatePostOwner(userId, post);
         validatePublishable(post);
 
-        ModerationResult moderationResult = moderationService.moderate(
+        ContentSafetyResult safetyResult = contentSafetyService.evaluate(
                 post.getTitle(),
                 post.getContent()
         );
+        ModerationResult moderationResult = safetyResult.moderation();
 
         Moderation moderation = new Moderation(
                 moderationResult.getStatus(),
                 moderationResult.getReason(),
+                safetyResult.crisis().status(),
                 post
         );
 
         moderationRepository.save(moderation);
 
+        if (safetyResult.crisis().isCritical()) {
+            post.saveAsPrivateDraft();
+            return new PublishPostResponse(
+                    post.getPostId(),
+                    PublishStatus.CRITICAL,
+                    "글을 나만 보기로 저장했습니다.",
+                    null
+            );
+        }
+
         if (moderationResult.getStatus() == ModerationStatus.APPROVED) {
             post.publish();
             return new PublishPostResponse(
                     post.getPostId(),
-                    PostStatus.PUBLISHED,
+                    PublishStatus.APPROVED,
                     "피드에 게시되었습니다.",
                     null
             );
@@ -215,7 +229,7 @@ public class PostService {
         post.reject();
         return new PublishPostResponse(
                 post.getPostId(),
-                PostStatus.REJECTED,
+                PublishStatus.REJECT,
                 "게시가 반려되었습니다.",
                 moderationResult.getReason()
         );

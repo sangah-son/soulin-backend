@@ -69,4 +69,10 @@ public class Post extends BaseEntity{
     public void reject(){
         this.status=PostStatus.REJECTED;
     }
+
+    public void saveAsPrivateDraft() {
+        this.status = PostStatus.DRAFT;
+        this.isPublic = false;
+        this.publishedAt = null;
+    }
 }

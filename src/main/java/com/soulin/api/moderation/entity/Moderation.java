@@ -1,5 +1,6 @@
 package com.soulin.api.moderation.entity;
 
+import com.soulin.api.crisis.CrisisStatus;
 import com.soulin.api.moderation.ModerationStatus;
 import com.soulin.api.post.entity.Post;
 import jakarta.persistence.*;
@@ -29,6 +30,10 @@ public class Moderation {
     @Column(columnDefinition = "TEXT")
     private String reason;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "crisis_status", length = 20)
+    private CrisisStatus crisisStatus;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -37,9 +42,10 @@ public class Moderation {
     @JoinColumn(name="post_id", nullable = false)
     private Post post;
 
-    public Moderation(ModerationStatus status,String reason,Post post){
-        this.status=status;
-        this.reason=reason;
-        this.post=post;
+    public Moderation(ModerationStatus status, String reason, CrisisStatus crisisStatus, Post post){
+        this.status = status;
+        this.reason = reason;
+        this.crisisStatus = crisisStatus;
+        this.post = post;
     }
 }
